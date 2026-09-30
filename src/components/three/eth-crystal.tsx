@@ -137,8 +137,49 @@ function Solid({ geometry }: { geometry: THREE.BufferGeometry }) {
   );
 }
 
-function Crystal({ animate }: { animate: boolean }) {
+/* ---------------------------------------------------------------------------
+ * Pointer interaction. DOM event handlers (on the wrapper) only write into this
+ * plain mutable object and the render loop reads it, so moving the mouse never
+ * triggers a React re-render.
+ * ------------------------------------------------------------------------- */
+class PointerState {
+  hover = false;
+  dragging = false;
+  /** Pointer position over the element, -1..1 (x right, y down). */
+  px = 0;
+  py = 0;
+  private dx = 0;
+  private dy = 0;
+
+  addDrag(dx: number, dy: number) {
+    this.dx += dx;
+    this.dy += dy;
+  }
+
+  /** Drag movement in px since the last call; resets the accumulator. */
+  consumeDrag() {
+    const out = { x: this.dx, y: this.dy };
+    this.dx = 0;
+    this.dy = 0;
+    return out;
+  }
+}
+
+type PointerRef = { current: PointerState };
+
+const YAW_PER_PX = 0.012;
+const PITCH_PER_PX = 0.008;
+const MAX_PITCH = 0.7;
+const BASE_PITCH = 0.06;
+
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+/** Frame-rate independent exponential smoothing toward a target. */
+const damp = (current: number, target: number, lambda: number, dt: number) =>
+  current + (target - current) * (1 - Math.exp(-lambda * dt));
+
+function Crystal({ pointer, autoMotion }: { pointer: PointerRef; autoMotion: boolean }) {
   const group = useRef<THREE.Group>(null);
+  const motion = useRef({ yaw: Math.PI / 4, velocity: 0, pitch: 0, hoverPitch: 0, hoverYaw: 0 });
   const { upperGeometry, lowerGeometry } = useMemo(() => {
     const { upper, lower } = buildFaces();
     return { upperGeometry: buildGeometry(upper), lowerGeometry: buildGeometry(lower) };
@@ -146,22 +187,60 @@ function Crystal({ animate }: { animate: boolean }) {
 
   useFrame((state, delta) => {
     const g = group.current;
-    if (!g || !animate) return;
+    if (!g) return;
     // Clamp delta so returning to a background tab doesn't cause a jump.
     const dt = Math.min(delta, 1 / 20);
-    g.rotation.y += dt * 0.32;
-    g.position.y = 0.08 + Math.sin(state.clock.elapsedTime * 1.1) * 0.07;
+    const p = pointer.current;
+    const m = motion.current;
+
+    const drag = p.consumeDrag();
+    if (p.dragging) {
+      const dYaw = drag.x * YAW_PER_PX;
+      m.yaw += dYaw;
+      m.pitch = clamp(m.pitch + drag.y * PITCH_PER_PX, -MAX_PITCH, MAX_PITCH);
+      // Track the release velocity so the spin carries on after letting go.
+      m.velocity = damp(m.velocity, dYaw / Math.max(dt, 1 / 240), 20, dt);
+    } else {
+      m.yaw += m.velocity * dt;
+      m.velocity *= Math.exp(-dt * 2.6);
+      m.pitch = damp(m.pitch, 0, 3.2, dt);
+      // Ease back into the slow idle spin (a touch slower while hovered).
+      if (autoMotion) m.yaw += dt * (p.hover ? 0.14 : 0.32);
+    }
+
+    // Hover: tip the crystal toward the cursor.
+    const engaged = p.hover || p.dragging;
+    m.hoverPitch = damp(m.hoverPitch, engaged ? p.py * 0.3 : 0, 6, dt);
+    m.hoverYaw = damp(m.hoverYaw, engaged ? p.px * 0.45 : 0, 6, dt);
+
+    g.rotation.set(BASE_PITCH + m.pitch + m.hoverPitch, m.yaw + m.hoverYaw, 0);
+    const float = autoMotion ? Math.sin(state.clock.elapsedTime * 1.1) * 0.07 : 0;
+    g.position.y = damp(g.position.y, 0.08 + float + (p.dragging ? 0.03 : 0), 8, dt);
   });
 
   return (
-    <group ref={group} position={[0, 0.08, 0]} rotation={[0.06, Math.PI / 4, 0]}>
+    <group ref={group} position={[0, 0.08, 0]} rotation={[BASE_PITCH, Math.PI / 4, 0]}>
       <Solid geometry={upperGeometry} />
       <Solid geometry={lowerGeometry} />
     </group>
   );
 }
 
-function Lights() {
+function Lights({ pointer }: { pointer: PointerRef }) {
+  const follow = useRef<THREE.PointLight>(null);
+
+  // The soft green point light drifts toward the cursor for a live, reactive feel.
+  useFrame((_, delta) => {
+    const light = follow.current;
+    if (!light) return;
+    const dt = Math.min(delta, 1 / 20);
+    const p = pointer.current;
+    const engaged = p.hover || p.dragging;
+    light.position.x = damp(light.position.x, 1.6 + (engaged ? p.px * 2.2 : 0), 5, dt);
+    light.position.y = damp(light.position.y, 0.4 + (engaged ? -p.py * 1.4 : 0), 5, dt);
+    light.intensity = damp(light.intensity, engaged ? 3.4 : 2.2, 5, dt);
+  });
+
   return (
     <>
       <ambientLight intensity={0.08} />
@@ -170,8 +249,8 @@ function Lights() {
       {/* green rim from behind */}
       <directionalLight position={[-3, 1.5, -4]} intensity={2.6} color="#39ff5a" />
       <directionalLight position={[3.5, -1, -3]} intensity={1.2} color="#46ff5f" />
-      {/* soft green point light in front, below */}
-      <pointLight position={[1.6, 0.4, 2.6]} intensity={2.2} distance={8} decay={2} color="#39ff5a" />
+      {/* soft green point light in front — follows the pointer */}
+      <pointLight ref={follow} position={[1.6, 0.4, 2.6]} intensity={2.2} distance={8} decay={2} color="#39ff5a" />
     </>
   );
 }
@@ -203,6 +282,8 @@ export default function EthCrystal({ className }: { className?: string }) {
   const container = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
   const reducedMotion = usePrefersReducedMotion();
+  const pointer = useRef(new PointerState());
+  const last = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const el = container.current;
@@ -214,21 +295,75 @@ export default function EthCrystal({ className }: { className?: string }) {
     return () => observer.disconnect();
   }, []);
 
-  const animate = visible && !reducedMotion;
+  function track(e: React.PointerEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    pointer.current.px = clamp(((e.clientX - rect.left) / rect.width) * 2 - 1, -1, 1);
+    pointer.current.py = clamp(((e.clientY - rect.top) / rect.height) * 2 - 1, -1, 1);
+  }
+
+  function onPointerEnter(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.pointerType === "touch") return; // touch has no hover
+    pointer.current.hover = true;
+    track(e);
+  }
+
+  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    track(e);
+    const p = pointer.current;
+    if (p.dragging) {
+      p.addDrag(e.clientX - last.current.x, e.clientY - last.current.y);
+      last.current = { x: e.clientX, y: e.clientY };
+    }
+  }
+
+  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    pointer.current.dragging = true;
+    last.current = { x: e.clientX, y: e.clientY };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    e.currentTarget.style.cursor = "grabbing";
+    track(e);
+  }
+
+  function endDrag(e: React.PointerEvent<HTMLDivElement>) {
+    pointer.current.dragging = false;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+    e.currentTarget.style.cursor = "grab";
+    if (e.pointerType === "touch") pointer.current.hover = false;
+  }
+
+  function onPointerLeave() {
+    // While dragging, pointer capture keeps events flowing, so only un-hover otherwise.
+    if (!pointer.current.dragging) pointer.current.hover = false;
+  }
 
   return (
-    <div ref={container} className={cn("relative", className)} aria-hidden>
+    <div
+      ref={container}
+      // pan-y: vertical swipes still scroll the page on touch; horizontal drags spin the crystal.
+      className={cn("relative touch-pan-y select-none", className)}
+      style={{ cursor: "grab" }}
+      onPointerEnter={onPointerEnter}
+      onPointerMove={onPointerMove}
+      onPointerDown={onPointerDown}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onPointerLeave={onPointerLeave}
+      aria-hidden
+    >
       <Canvas
-        frameloop={animate ? "always" : "demand"}
+        // Rendering continues while on screen so hover/drag stay responsive;
+        // only the idle spin/float honours prefers-reduced-motion.
+        frameloop={visible ? "always" : "never"}
         dpr={[1, 2]}
         camera={{ position: [0, 0, 5], fov: 35 }}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         fallback={<EthGlyph className="size-full" />}
-        style={{ background: "transparent" }}
+        style={{ background: "transparent", touchAction: "pan-y" }}
       >
         <StudioEnvironment intensity={0.22} />
-        <Lights />
-        <Crystal animate={animate} />
+        <Lights pointer={pointer} />
+        <Crystal pointer={pointer} autoMotion={!reducedMotion} />
       </Canvas>
     </div>
   );
