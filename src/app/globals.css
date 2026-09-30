@@ -1,26 +1,255 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Nexora design tokens — tuned against the reference dashboard (image.png).
+ * Very dark green-black canvas, dark-green card surfaces, thin low-contrast
+ * borders and a single neon-lime accent. No blue/purple anywhere.
+ */
+@theme {
+  --color-bg: #050d09;
+  --color-bg-2: #08150f;
+  --color-surface: #0b1812;
+  --color-surface-2: #0d1d15;
+  --color-surface-3: #10241a;
+  --color-line: #1a3024;
+  --color-line-2: #203a2a;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-primary: #39ff5a;
+  --color-primary-2: #46ff5f;
+  --color-soft: #9bffa8;
+  --color-on-primary: #04130a;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --color-fg: #f2f7f3;
+  --color-secondary: #8b9a91;
+  --color-dim: #5e6d64;
+
+  --color-danger: #d85b62;
+  --color-warn: #d9a441;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 24px;
+  --radius-tile: 18px;
+
+  --shadow-glow: 0 0 24px -4px rgba(57, 255, 90, 0.45);
+
+  --animate-fade-in: fade-in 200ms ease-out both;
+  --animate-slide-up: slide-up 220ms ease-out both;
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes shimmer {
+    0%,
+    100% {
+      opacity: 0.45;
+    }
+    50% {
+      opacity: 0.9;
+    }
   }
 }
 
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-bg);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(900px 500px at 88% -8%, rgba(57, 255, 90, 0.07), transparent 60%),
+    radial-gradient(700px 500px at -10% 110%, rgba(57, 255, 90, 0.04), transparent 60%);
+  background-attachment: fixed;
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(57, 255, 90, 0.28);
+}
+
+/*
+ * Keyboard focus ring for buttons/links. Kept in the base layer so component
+ * utilities can override it, and never applied to text fields: those show
+ * their focus on the wrapping pill (focus-within) instead of an inner box.
+ */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: none;
+  }
+  input::placeholder {
+    color: var(--color-dim);
+  }
+  /* Browser autofill would otherwise paint fields white/blue. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-fg);
+    caret-color: var(--color-fg);
+    -webkit-box-shadow: 0 0 0 1000px #08150f inset;
+    box-shadow: 0 0 0 1000px #08150f inset;
+    transition: background-color 9999s ease-out 0s;
+  }
+}
+
+/* Shared pill field: one clean ring on focus, no inner outline. */
+.field-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  border: 1px solid var(--color-line-2);
+  background: rgba(8, 21, 15, 0.8);
+  transition:
+    border-color 200ms ease-out,
+    box-shadow 200ms ease-out;
+}
+.field-pill:hover {
+  border-color: #2a4d38;
+}
+.field-pill:focus-within {
+  border-color: rgba(57, 255, 90, 0.75);
+  box-shadow: 0 0 0 3px rgba(57, 255, 90, 0.12);
+}
+.field-pill[data-invalid="true"] {
+  border-color: rgba(216, 91, 98, 0.6);
+}
+.field-pill[data-invalid="true"]:focus-within {
+  border-color: rgba(216, 91, 98, 0.85);
+  box-shadow: 0 0 0 3px rgba(216, 91, 98, 0.15);
+}
+.field-pill input {
+  height: 100%;
+  min-width: 0;
+  flex: 1;
+  background: transparent;
+  color: var(--color-fg);
+  font-size: 14px;
+  outline: none;
+}
+
+/* Slim scrollbars that match the surface palette. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-2) transparent;
+}
+
+@layer components {
+  .surface-card {
+    background: linear-gradient(155deg, #0f2318 0%, #0a1710 52%, #08120d 100%);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+  }
+  .surface-tile {
+    background: linear-gradient(155deg, #0e2117 0%, #0a1710 60%, #08120d 100%);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-tile);
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Binary tree connectors — subtle green lines between nodes. */
+.bt-tree ul {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-top: 24px;
+  margin: 0;
+}
+.bt-tree li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  list-style: none;
+  padding: 24px 10px 0;
+}
+.bt-tree li::before,
+.bt-tree li::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 50%;
+  width: 50%;
+  height: 24px;
+  border-top: 1px solid #244a33;
+}
+.bt-tree li::after {
+  right: auto;
+  left: 50%;
+  border-left: 1px solid #244a33;
+}
+.bt-tree li:first-child::before,
+.bt-tree li:last-child::after {
+  border: 0 none;
+}
+.bt-tree li:last-child::before {
+  border-right: 1px solid #244a33;
+  border-radius: 0 10px 0 0;
+}
+.bt-tree li:first-child::after {
+  border-radius: 10px 0 0 0;
+}
+.bt-tree li:only-child {
+  padding-top: 0;
+}
+.bt-tree li:only-child::before,
+.bt-tree li:only-child::after {
+  display: none;
+}
+.bt-tree ul ul::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 24px;
+  border-left: 1px solid #244a33;
+}
+.bt-tree > ul {
+  padding-top: 0;
 }
