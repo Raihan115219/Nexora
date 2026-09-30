@@ -34,7 +34,7 @@ export default function AdminOverviewPage() {
     <>
       <PageHeader title="Admin Overview" description="Platform-wide activity across users, deposits and packages." />
 
-      <section aria-label="Platform stats" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-5">
+      <section aria-label="Platform stats" className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-5">
         <KpiCard icon={Users} label="Total Users" value={stats.totalUsers} highlight />
         <KpiCard icon={UserCheck} label="Active Users" value={stats.activeUsers} sub="Holding a package" />
         <KpiCard icon={Landmark} label="Total Deposits" value={formatUsd(stats.totalDeposits, { whole: true })} />
@@ -42,7 +42,7 @@ export default function AdminOverviewPage() {
         <KpiCard icon={Coins} label="Total Team Volume" value={formatUsd(stats.totalTeamVolume, { whole: true })} />
       </section>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader
             title="Newest members"

@@ -67,7 +67,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="surface-card relative w-full max-w-md animate-slide-up rounded-b-none border-line-2 p-6 shadow-2xl sm:rounded-b-card"
+        className="surface-card relative max-h-[92dvh] w-full max-w-md animate-slide-up overflow-y-auto overscroll-contain rounded-b-none border-line-2 p-5 shadow-2xl sm:rounded-b-card sm:p-6"
       >
         <div className="mb-5 flex items-center justify-between">
           <h2 id={titleId} className="text-lg font-semibold">

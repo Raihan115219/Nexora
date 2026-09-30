@@ -39,7 +39,7 @@ export default function WalletPage() {
         }
       />
 
-      <section aria-label="Balance summary" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <section aria-label="Balance summary" className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         <KpiCard icon={Wallet} label="Total portfolio value" value={formatUsd(summary.totalValue)} highlight />
         <KpiCard icon={PiggyBank} label="Available balance" value={formatUsd(summary.availableValue)} />
         <KpiCard icon={Lock} label="Locked balance" value={formatUsd(summary.lockedValue)} sub="Staked tokens" />
@@ -48,12 +48,12 @@ export default function WalletPage() {
 
       <section aria-label="Assets" className="mt-6">
         <h2 className="mb-4 text-base font-semibold">Assets</h2>
-        <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {wallet.balances.map((b) => (
             <AssetTile key={b.symbol} balance={b} />
           ))}
         </div>
-        <TableShell>
+        <TableShell className="hidden md:block">
           <thead>
             <tr>
               <Th>Asset</Th>

@@ -14,7 +14,7 @@ export function SegmentedTabs<T extends string>({
   label: string;
 }) {
   return (
-    <div role="tablist" aria-label={label} className="flex items-center gap-1.5">
+    <div role="tablist" aria-label={label} className="flex w-max items-center gap-1.5">
       {options.map((option) => {
         const active = option === value;
         return (
@@ -24,7 +24,7 @@ export function SegmentedTabs<T extends string>({
             aria-selected={active}
             onClick={() => onChange(option)}
             className={cn(
-              "h-8 min-w-11 rounded-full border px-3 text-xs font-medium transition-all duration-200 ease-out",
+              "h-8 min-w-11 shrink-0 rounded-full border px-3 text-xs font-medium whitespace-nowrap transition-all duration-200 ease-out",
               active
                 ? "border-primary bg-primary text-on-primary"
                 : "border-line-2 bg-surface/60 text-secondary hover:border-primary/40 hover:text-fg",

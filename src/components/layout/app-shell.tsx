@@ -17,7 +17,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [drawerOpen]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
       <Header onMenu={() => setDrawerOpen(true)} />
       <div className="flex">
         <aside className="sticky top-[72px] hidden h-[calc(100vh-72px)] w-[80px] shrink-0 2xl:w-[264px] border-r border-line lg:block">

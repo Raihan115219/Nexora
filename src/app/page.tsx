@@ -18,7 +18,7 @@ const FEATURES = [
 
 export default function LandingPage() {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden">
+    <div className="relative flex min-h-dvh flex-col overflow-hidden">
       <div
         aria-hidden
         className="pointer-events-none absolute top-[-200px] left-1/2 size-[720px] -translate-x-1/2 rounded-full bg-primary/[0.07] blur-[120px]"
@@ -42,12 +42,12 @@ export default function LandingPage() {
       </header>
 
       <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center px-5 pb-16">
-        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_420px] xl:gap-16">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1fr)_420px] xl:gap-16">
           <div className="max-w-3xl">
             <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-line-2 bg-surface/60 px-3.5 py-1.5 text-xs text-secondary">
               <span className="size-1.5 rounded-full bg-primary shadow-glow" aria-hidden /> Phase 1 demo
             </p>
-            <h1 className="text-[56px] leading-[1.02] font-semibold tracking-tight sm:text-[80px] xl:text-[88px]">
+            <h1 className="text-[44px] leading-[1.02] font-semibold tracking-tight min-[380px]:text-[56px] sm:text-[80px] xl:text-[88px]">
               Build.
               <br />
               Connect.
@@ -99,7 +99,7 @@ export default function LandingPage() {
           </aside>
         </div>
 
-        <ul className="mt-16 grid gap-4 sm:grid-cols-3 lg:mt-20">
+        <ul className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-3 lg:mt-20">
           {FEATURES.map(({ icon: Icon, title, text }) => (
             <li key={title} className="surface-card p-5">
               <span className="mb-4 grid size-10 place-items-center rounded-full border border-line-2 bg-surface-3 text-primary">

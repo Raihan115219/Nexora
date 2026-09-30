@@ -39,7 +39,7 @@ export default function SettingsPage() {
   return (
     <>
       <PageHeader title="Settings" description="Your profile and demo controls." />
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader title="Profile" />
           <div className="mb-5 flex items-center gap-4">

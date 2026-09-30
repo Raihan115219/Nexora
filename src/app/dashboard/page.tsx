@@ -28,7 +28,7 @@ export default function DashboardPage() {
   const pkg = summary.activePackage;
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
       <div className="min-w-0 space-y-6">
         <div>
           <h1 className="text-[28px] font-semibold leading-tight tracking-tight sm:text-[32px]">
@@ -37,7 +37,7 @@ export default function DashboardPage() {
           <p className="mt-1 text-sm text-secondary">Here&apos;s how your Nexora portfolio is performing.</p>
         </div>
 
-        <section aria-label="Balances" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <section aria-label="Balances" className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           <KpiCard icon={Wallet} label="Total Balance" value={formatUsd(summary.wallet.totalValue)} sub="All assets" />
           <KpiCard icon={PiggyBank} label="Available Balance" value={formatUsd(summary.wallet.availableValue)} sub="Ready to use" highlight />
           <KpiCard icon={TrendingUp} label="Total Earnings" value={formatUsd(summary.totalEarnings)} sub="Referral + ROI rewards" />
@@ -49,7 +49,7 @@ export default function DashboardPage() {
           />
         </section>
 
-        <section aria-label="Network" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <section aria-label="Network" className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           <KpiCard icon={Share2} label="Direct Referrals" value={summary.directReferrals} sub={`${summary.activeDirects} active`} />
           <KpiCard icon={Coins} label="Team Volume" value={formatUsd(summary.teamVolume, { whole: true })} sub={`${summary.totalTeam} team members`} />
           <KpiCard icon={Award} label="Current Rank" value={summary.rank.label} sub={summary.rank.detail} />
@@ -58,7 +58,7 @@ export default function DashboardPage() {
 
         <PortfolioCard totalValue={summary.wallet.totalValue} />
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader
               title="Recent Transactions"
@@ -86,7 +86,7 @@ export default function DashboardPage() {
               See All
             </Link>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2">
             {wallet.balances.map((b) => (
               <AssetTile key={b.symbol} balance={b} />
             ))}

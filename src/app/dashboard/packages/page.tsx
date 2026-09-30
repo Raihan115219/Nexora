@@ -35,7 +35,7 @@ export default function PackagesPage() {
         title="Founder Packages"
         description={`Choose your founder tier. Available balance: ${formatUsd(balance.availableValue)}`}
       />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {founders.map((pkg, i) => (
           <PackageCard
             key={pkg.id}

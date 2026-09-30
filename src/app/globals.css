@@ -72,10 +72,16 @@
 
 html {
   background: var(--color-bg);
+  /* Never let the page itself scroll sideways; wide content scrolls in its own container. */
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
+  max-width: 100vw;
+  overflow-x: clip;
   background-color: var(--color-bg);
   background-image:
     radial-gradient(900px 500px at 88% -8%, rgba(57, 255, 90, 0.07), transparent 60%),
@@ -159,6 +165,32 @@ body {
   color: var(--color-fg);
   font-size: 14px;
   outline: none;
+}
+
+/* iOS Safari zooms the page when a focused input is below 16px. */
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select,
+  .field-pill input {
+    font-size: 16px;
+  }
+}
+
+/* Media and long words must never push their container wider than the screen. */
+img,
+svg,
+canvas,
+video {
+  max-width: 100%;
+}
+p,
+h1,
+h2,
+h3,
+dd,
+li {
+  overflow-wrap: anywhere;
 }
 
 /* Slim scrollbars that match the surface palette. */
