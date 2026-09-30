@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, GitBranch, ShieldCheck, Wallet } from "lucide-react";
-import { siteConfig } from "@/config/site";
+import { AUTH_ENABLED, siteConfig } from "@/config/site";
 import { Logo } from "@/components/ui/logo";
 import { EthHero } from "@/components/three/eth-hero";
 
@@ -17,6 +17,8 @@ const FEATURES = [
 ];
 
 export default function LandingPage() {
+  // With auth hidden, "Get Started" goes straight into the demo dashboard.
+  const startHref = AUTH_ENABLED ? "/register" : "/dashboard";
   return (
     <div className="relative flex min-h-dvh flex-col overflow-hidden">
       <div
@@ -26,14 +28,16 @@ export default function LandingPage() {
       <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6">
         <Logo />
         <nav className="flex items-center gap-2" aria-label="Account">
+          {AUTH_ENABLED && (
+            <Link
+              href="/login"
+              className="rounded-full px-4 py-2 text-sm font-medium text-secondary transition-colors hover:text-fg"
+            >
+              Sign In
+            </Link>
+          )}
           <Link
-            href="/login"
-            className="rounded-full px-4 py-2 text-sm font-medium text-secondary transition-colors hover:text-fg"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/register"
+            href={startHref}
             className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-on-primary transition-all duration-200 hover:bg-primary-2 hover:shadow-glow"
           >
             Get Started
@@ -57,17 +61,19 @@ export default function LandingPage() {
             <p className="mt-6 max-w-xl text-lg text-secondary">{siteConfig.tagline}</p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link
-                href="/register"
+                href={startHref}
                 className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-7 text-[15px] font-semibold text-on-primary transition-all duration-200 hover:bg-primary-2 hover:shadow-glow"
               >
                 Get Started <ArrowRight className="size-4" aria-hidden />
               </Link>
-              <Link
-                href="/login"
-                className="inline-flex h-12 items-center rounded-full border border-line-2 bg-surface-3 px-7 text-[15px] font-medium text-fg transition-colors hover:border-primary/50 hover:text-primary"
-              >
-                Sign In
-              </Link>
+              {AUTH_ENABLED && (
+                <Link
+                  href="/login"
+                  className="inline-flex h-12 items-center rounded-full border border-line-2 bg-surface-3 px-7 text-[15px] font-medium text-fg transition-colors hover:border-primary/50 hover:text-primary"
+                >
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
 

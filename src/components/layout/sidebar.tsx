@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { adminEntry, adminNav, settingsEntry, userNav, type NavItem } from "@/config/navigation";
+import { AUTH_ENABLED } from "@/config/site";
 import { logout } from "@/lib/auth";
 import { cn } from "@/lib/utils/format";
 import { useCurrentUser } from "@/store/hooks";
@@ -91,6 +92,7 @@ export function Sidebar({ onNavigate, expanded = false }: { onNavigate?: () => v
           />
         )}
         <NavLink item={settingsEntry} pathname={pathname} onNavigate={onNavigate} labels={labels} />
+        {AUTH_ENABLED && (
         <button
           onClick={handleLogout}
           title="Logout"
@@ -104,6 +106,7 @@ export function Sidebar({ onNavigate, expanded = false }: { onNavigate?: () => v
           </span>
           <span className={labels}>Logout</span>
         </button>
+        )}
       </div>
     </nav>
   );

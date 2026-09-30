@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Bell, ChevronDown, Menu, Search, Wallet as WalletIcon } from "lucide-react";
 import { adminNav, userNav } from "@/config/navigation";
+import { AUTH_ENABLED } from "@/config/site";
 import { logout } from "@/lib/auth";
 import { getUserTransactions, getWallet } from "@/lib/wallet";
 import { cn, formatDateTime, shortAddress } from "@/lib/utils/format";
@@ -182,15 +183,17 @@ function UserMenu() {
           >
             Settings
           </Link>
-          <button
-            onClick={async () => {
-              await logout();
-              router.replace("/login");
-            }}
-            className="block w-full rounded-xl px-3 py-2 text-left text-sm text-secondary hover:bg-surface-3 hover:text-danger"
-          >
-            Log out
-          </button>
+          {AUTH_ENABLED && (
+            <button
+              onClick={async () => {
+                await logout();
+                router.replace("/login");
+              }}
+              className="block w-full rounded-xl px-3 py-2 text-left text-sm text-secondary hover:bg-surface-3 hover:text-danger"
+            >
+              Log out
+            </button>
+          )}
         </Popover>
       )}
     </div>

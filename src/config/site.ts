@@ -27,6 +27,13 @@ export const DEMO_ACCOUNTS = {
   admin: { email: "admin@nexora.io", password: "Demo@1234" },
 } as const;
 
+/**
+ * Login / register / forgot-password are hidden while this is false: those
+ * routes redirect to the dashboard and the app signs in the demo member
+ * automatically. Set NEXT_PUBLIC_AUTH_ENABLED=true to bring them back.
+ */
+export const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
+
 export const PASSWORD_MIN_LENGTH = 8;
 
 export const STORAGE_KEYS = {

@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { RotateCcw } from "lucide-react";
+import { AUTH_ENABLED, DEMO_ACCOUNTS } from "@/config/site";
+import { login } from "@/lib/auth";
 import { getWallet } from "@/lib/wallet";
 import { formatDate } from "@/lib/utils/format";
 import { Avatar } from "@/components/ui/avatar";
@@ -32,8 +34,23 @@ export default function SettingsPage() {
     await resetDemo();
     setBusy(false);
     setConfirmOpen(false);
-    toast.success("Demo data reset", "Sign in again with a demo account.");
-    router.replace("/login");
+    if (AUTH_ENABLED) {
+      toast.success("Demo data reset", "Sign in again with a demo account.");
+      router.replace("/login");
+    } else {
+      toast.success("Demo data reset", "Restored the original demo data.");
+      router.replace("/dashboard");
+    }
+  }
+
+  async function switchAccount(kind: keyof typeof DEMO_ACCOUNTS) {
+    const result = await login(DEMO_ACCOUNTS[kind]);
+    if (!result.ok) {
+      toast.error("Could not switch account", result.error);
+      return;
+    }
+    toast.success(`Now viewing as ${result.data.name}`);
+    router.replace(kind === "admin" ? "/admin" : "/dashboard");
   }
 
   return (
@@ -64,6 +81,32 @@ export default function SettingsPage() {
             ))}
           </dl>
         </Card>
+
+        {!AUTH_ENABLED && (
+          <Card>
+            <CardHeader title="Demo account" />
+            <p className="text-sm text-secondary">
+              Sign-in is hidden for now, so the app opens as the demo member. Switch to the admin account to inspect
+              the admin panel.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Button
+                variant={user.role === "user" ? "primary" : "secondary"}
+                onClick={() => switchAccount("user")}
+                disabled={user.role === "user"}
+              >
+                Member · Alex Morgan
+              </Button>
+              <Button
+                variant={user.role === "admin" ? "primary" : "secondary"}
+                onClick={() => switchAccount("admin")}
+                disabled={user.role === "admin"}
+              >
+                Admin · Nadia Petrov
+              </Button>
+            </div>
+          </Card>
+        )}
 
         <Card>
           <CardHeader title="Demo data" />
